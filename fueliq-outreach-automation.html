@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FuelIQ — Daily Outreach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--surface3:#2d333b;
+  --border:#30363d;--border2:#3d444c;
+  --accent:#2ea043;--accent-dim:rgba(46,160,67,0.15);--accent-glow:rgba(46,160,67,0.3);
+  --amber:#d29922;--amber-dim:rgba(210,153,34,0.12);
+  --red:#f85149;--red-dim:rgba(248,81,73,0.12);
+  --blue:#58a6ff;--blue-dim:rgba(88,166,255,0.1);
+  --text:#e6edf3;--text-mid:#8b949e;--text-dim:#484f58;
+  --font:'DM Sans',system-ui,sans-serif;--mono:'DM Mono',monospace;
+  --radius:6px;--radius-lg:10px;
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5}
+a{color:var(--blue);text-decoration:none}
+
+/* LAYOUT */
+.shell{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;height:52px;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50}
+.logo{display:flex;align-items:center;gap:8px;font-weight:500;font-size:15px;color:var(--text)}
+.logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent-glow)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent-glow);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-family:var(--mono)}
+.badge-green{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(46,160,67,0.3)}
+.badge-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(210,153,34,0.3)}
+.badge-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(88,166,255,0.25)}
+.badge-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,81,73,0.3)}
+
+.main{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 52px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.25rem 1rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto}
+.sidebar-section-label{font-size:11px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;padding:0 4px;margin-bottom:4px}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px}
+.stat-num{font-size:22px;font-weight:500;font-family:var(--mono);line-height:1}
+.stat-label{font-size:11px;color:var(--text-mid);margin-top:3px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.config-block{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px}
+.config-label{font-size:12px;color:var(--text-mid);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.config-input{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font);font-size:13px;padding:7px 10px;outline:none;transition:border .15s}
+.config-input:focus{border-color:var(--accent)}
+select.config-input{cursor:pointer}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:var(--radius);border:none;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#3fb950}
+.btn-primary:disabled{background:var(--surface3);color:var(--text-dim);cursor:not-allowed}
+.btn-secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text-mid)}
+.btn-secondary:hover{background:var(--surface3);color:var(--text)}
+.btn-danger{background:var(--red-dim);border:1px solid rgba(248,81,73,0.3);color:var(--red)}
+.btn-full{width:100%}
+
+/* CONTENT */
+.content{padding:1.5rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.25rem}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.section-title{font-size:15px;font-weight:500}
+.section-sub{font-size:12px;color:var(--text-mid);margin-top:2px}
+
+/* TODAY'S QUEUE */
+.queue-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.queue-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2)}
+.queue-body{max-height:320px;overflow-y:auto}
+
+.lead-row{display:grid;grid-template-columns:28px 1fr auto auto 100px 80px;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid rgba(48,54,61,.6);transition:background .1s}
+.lead-row:last-child{border-bottom:none}
+.lead-row:hover{background:var(--surface2)}
+.lead-row.sent{opacity:.55}
+.lead-num{font-size:11px;color:var(--text-dim);font-family:var(--mono)}
+.lead-name{font-weight:500;font-size:13px}
+.lead-company{font-size:11px;color:var(--text-mid)}
+.lead-sector{font-size:11px;padding:1px 7px;border-radius:12px}
+.lead-spend{font-size:12px;color:var(--text-mid);font-family:var(--mono);text-align:right}
+.lead-status{text-align:right}
+
+/* PREVIEW PANEL */
+.preview-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem}
+.preview-empty{text-align:center;padding:3rem 1rem;color:var(--text-mid)}
+.preview-empty-icon{font-size:32px;margin-bottom:.75rem;opacity:.4}
+.email-preview{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.email-header{background:var(--surface2);padding:12px 16px;border-bottom:1px solid var(--border)}
+.email-field{display:flex;gap:10px;font-size:12px;padding:2px 0}
+.email-field-label{color:var(--text-dim);min-width:50px}
+.email-field-val{color:var(--text-mid)}
+.email-subject-val{color:var(--text);font-weight:500}
+.email-body{padding:16px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--text-mid)}
+.email-body a{color:var(--blue)}
+.email2-label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;padding:8px 16px;border-top:1px solid var(--border);background:var(--surface2)}
+.email2-body{padding:14px 16px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--text-mid);border-top:1px solid var(--border)}
+
+/* LOG */
+.log-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.log-header{padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text-mid);display:flex;justify-content:space-between}
+.log-body{max-height:160px;overflow-y:auto;font-family:var(--mono);font-size:11px;padding:10px 16px}
+.log-line{padding:2px 0;border-bottom:1px solid rgba(48,54,61,.4);color:var(--text-mid)}
+.log-line:last-child{border-bottom:none}
+.log-time{color:var(--text-dim)}
+.log-ok{color:var(--accent)}
+.log-err{color:var(--red)}
+.log-info{color:var(--blue)}
+
+/* PROGRESS BAR */
+.progress-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text-mid);margin-bottom:8px}
+.progress-track{background:var(--surface3);border-radius:4px;height:6px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease}
+
+/* GMAIL AUTH */
+.auth-banner{background:var(--amber-dim);border:1px solid rgba(210,153,34,0.3);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.auth-banner.hidden{display:none}
+.auth-text{font-size:13px;color:var(--amber)}
+
+/* SECTOR COLORS */
+.sc-logistics{background:rgba(88,166,255,.1);color:#79c0ff}
+.sc-construction{background:rgba(210,153,34,.12);color:#e3b341}
+.sc-waste{background:rgba(46,160,67,.12);color:#56d364}
+.sc-retail{background:rgba(188,140,255,.1);color:#c9b1ff}
+.sc-agriculture{background:rgba(46,160,67,.1);color:#7ee787}
+.sc-mining{background:rgba(248,81,73,.1);color:#ff7b72}
+.sc-courier{background:rgba(255,123,114,.1);color:#ffa198}
+.sc-security{background:rgba(139,148,158,.12);color:#8b949e}
+.sc-health{background:rgba(248,81,73,.08);color:#f47067}
+.sc-fuel{background:rgba(210,153,34,.08);color:#d4a72c}
+
+/* LOADING OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(13,17,23,.85);z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+.overlay.hidden{display:none}
+.spinner{width:36px;height:36px;border:3px solid var(--surface3);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.overlay-msg{font-size:14px;color:var(--text-mid)}
+.overlay-progress{font-family:var(--mono);font-size:12px;color:var(--accent)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 16px;font-size:13px;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,.4);animation:slideIn .2s ease;display:flex;align-items:center;gap:8px}
+.toast.success{border-color:rgba(46,160,67,.4)}
+.toast.error{border-color:rgba(248,81,73,.4);color:var(--red)}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1rem}
+.tab{padding:8px 16px;font-size:13px;color:var(--text-mid);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font);transition:all .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover:not(.active){color:var(--text)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* EDITABLE EMAIL */
+[contenteditable]{outline:none;border-radius:4px;padding:2px 4px;transition:background .15s}
+[contenteditable]:focus{background:var(--surface3)}
+[contenteditable]:hover{background:rgba(255,255,255,.03)}
+
+/* RESET CONFIRM */
+.modal{position:fixed;inset:0;background:rgba(13,17,23,.8);z-index:400;display:flex;align-items:center;justify-content:center}
+.modal.hidden{display:none}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;width:360px;text-align:center}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:.5rem}
+.modal-body{font-size:13px;color:var(--text-mid);margin-bottom:1.25rem}
+.modal-actions{display:flex;gap:8px;justify-content:center}
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="overlay hidden" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-msg" id="overlay-msg">Generating emails with AI…</div>
+  <div class="overlay-progress" id="overlay-progress"></div>
+</div>
+
+<!-- Reset modal -->
+<div class="modal hidden" id="reset-modal">
+  <div class="modal-box">
+    <div class="modal-title">Reset all progress?</div>
+    <div class="modal-body">This will mark all 100 leads as unsent and clear your outreach history. This cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeResetModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmReset()">Reset everything</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<div class="shell">
+  <div class="topbar">
+    <div class="logo"><div class="logo-dot"></div> FuelIQ Outreach</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid)">
+      <div class="status-dot" id="gmail-dot" style="background:var(--text-dim);box-shadow:none"></div>
+      <span id="gmail-status-text">Gmail not connected</span>
+    </div>
+    <div class="topbar-right">
+      <span class="badge badge-blue" id="today-date"></span>
+      <button class="btn btn-secondary" onclick="openResetModal()" style="font-size:12px;padding:5px 10px">Reset</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div>
+        <div class="sidebar-section-label">Pipeline</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-num" id="stat-total">100</div><div class="stat-label">Total leads</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:var(--accent)" id="stat-sent">0</div><div class="stat-label">Contacted</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:var(--amber)" id="stat-remaining">100</div><div class="stat-label">Remaining</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:var(--blue)" id="stat-today">0</div><div class="stat-label">Today</div></div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Campaign progress</span><span id="progress-pct">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+
+      <div>
+        <div class="sidebar-section-label">Configuration</div>
+        <div class="config-block" style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div class="config-label">Your name</div>
+            <input class="config-input" id="cfg-name" type="text" value="Liya" placeholder="Your first name">
+          </div>
+          <div>
+            <div class="config-label">Your email</div>
+            <input class="config-input" id="cfg-email" type="email" placeholder="you@domain.com">
+          </div>
+          <div>
+            <div class="config-label">Dashboard base URL</div>
+            <input class="config-input" id="cfg-dashboard" type="text" value="https://drive.google.com/file/d/YOUR_FILE_ID/view" placeholder="Shared dashboard link">
+          </div>
+          <div>
+            <div class="config-label">Leads per batch</div>
+            <select class="config-input" id="cfg-batch">
+              <option value="10">10 leads / day</option>
+              <option value="25" selected>25 leads / day</option>
+              <option value="50">50 leads / day</option>
+            </select>
+          </div>
+          <div>
+            <div class="config-label">Voice variation</div>
+            <select class="config-input" id="cfg-voice">
+              <option value="A">A — Straight shooter</option>
+              <option value="B">B — Curiosity gap</option>
+              <option value="C">C — Social proof hook</option>
+              <option value="MIX" selected>Mix (rotate A/B/C)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sidebar-section-label">Gmail</div>
+        <div class="config-block" style="display:flex;flex-direction:column;gap:8px">
+          <p style="font-size:12px;color:var(--text-mid);line-height:1.5">Connect Gmail so emails send automatically. Uses Gmail API via OAuth — your credentials never leave your browser.</p>
+          <button class="btn btn-secondary btn-full" id="gmail-connect-btn" onclick="connectGmail()">Connect Gmail account</button>
+          <div id="gmail-connected-info" style="display:none">
+            <div style="font-size:12px;color:var(--accent);margin-bottom:6px">✓ Connected as <span id="gmail-email-display"></span></div>
+            <button class="btn btn-danger btn-full" style="font-size:12px;padding:6px" onclick="disconnectGmail()">Disconnect</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:auto">
+        <button class="btn btn-primary btn-full" id="run-btn" onclick="runDailyOutreach()">
+          ▶ Run today's outreach (25 leads)
+        </button>
+        <p style="font-size:11px;color:var(--text-dim);margin-top:6px;text-align:center">Generates AI emails → sends via Gmail → updates status</p>
+      </div>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <div class="content">
+
+      <!-- Gmail auth banner -->
+      <div class="auth-banner hidden" id="auth-banner">
+        <span style="font-size:18px">⚠️</span>
+        <div>
+          <div class="auth-text" style="font-weight:500">Gmail not connected</div>
+          <div class="auth-text" style="font-size:12px;opacity:.8">Connect Gmail in the sidebar to enable sending. You can still preview generated emails.</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('queue',this)">Today's Queue</button>
+        <button class="tab" onclick="switchTab('preview',this)">Email Preview</button>
+        <button class="tab" onclick="switchTab('all',this)">All Leads</button>
+        <button class="tab" onclick="switchTab('log',this)">Activity Log</button>
+      </div>
+
+      <!-- TODAY'S QUEUE TAB -->
+      <div class="tab-panel active" id="tab-queue">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Today's batch — <span id="queue-date-label"></span></div>
+            <div class="section-sub" id="queue-sub">Click "Run today's outreach" to generate and send emails to the next 25 leads.</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary" onclick="generatePreview()" id="preview-btn">Generate preview</button>
+            <button class="btn btn-primary" onclick="sendAllQueued()" id="send-all-btn" style="display:none">Send all <span id="send-count">25</span> emails</button>
+          </div>
+        </div>
+
+        <div class="queue-card">
+          <div class="queue-header">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:13px;font-weight:500">Queue</span>
+              <span class="badge badge-blue" id="queue-count-badge">0 leads</span>
+            </div>
+            <span style="font-size:12px;color:var(--text-dim)" id="queue-sent-label"></span>
+          </div>
+          <div class="queue-body" id="queue-body">
+            <div style="padding:2rem;text-align:center;color:var(--text-dim);font-size:13px">
+              Click "Generate preview" to load today's 25 leads and build their emails.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL PREVIEW TAB -->
+      <div class="tab-panel" id="tab-preview">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Email preview</div>
+            <div class="section-sub">Click any lead in the queue to preview their email. You can edit before sending.</div>
+          </div>
+        </div>
+        <div id="preview-area">
+          <div class="preview-empty">
+            <div class="preview-empty-icon">✉</div>
+            <div style="font-weight:500;margin-bottom:4px">No email selected</div>
+            <div style="font-size:12px">Generate the queue first, then click a lead to preview</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALL LEADS TAB -->
+      <div class="tab-panel" id="tab-all">
+        <div class="section-header">
+          <div><div class="section-title">All 100 prospects</div><div class="section-sub">Sorted by priority tier. Sent leads shown faded.</div></div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="text" placeholder="Search…" id="all-search" oninput="renderAllLeads()" class="config-input" style="width:160px">
+            <select id="all-filter" onchange="renderAllLeads()" class="config-input" style="width:130px">
+              <option value="">All sectors</option>
+              <option value="logistics">Logistics</option>
+              <option value="security">Security</option>
+              <option value="retail">Retail/FMCG</option>
+              <option value="construction">Construction</option>
+              <option value="waste">Waste</option>
+              <option value="courier">Courier</option>
+              <option value="mining">Mining</option>
+              <option value="agriculture">Agriculture</option>
+              <option value="health">Healthcare</option>
+              <option value="fuel">Fuel/Energy</option>
+            </select>
+          </div>
+        </div>
+        <div class="queue-card">
+          <div class="queue-body" style="max-height:500px" id="all-leads-body"></div>
+        </div>
+      </div>
+
+      <!-- LOG TAB -->
+      <div class="tab-panel" id="tab-log">
+        <div class="section-header">
+          <div><div class="section-title">Activity log</div><div class="section-sub">All outreach actions this session.</div></div>
+          <button class="btn btn-secondary" onclick="clearLog()" style="font-size:12px;padding:5px 10px">Clear</button>
+        </div>
+        <div class="log-block">
+          <div class="log-header"><span>Recent activity</span><span id="log-count">0 entries</span></div>
+          <div class="log-body" id="log-body"><div style="color:var(--text-dim)">No activity yet.</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── PROSPECT DATA ────────────────────────────────────────────────────────────
+const PROSPECTS = [
+  {id:1,company:"Fidelity Security Services",sector:"security",location:"Nationwide",fleet:"1000+",spend:"R4.5M+/mo",tier:1},
+  {id:2,company:"Shoprite Fleet Services",sector:"retail",location:"Cape Town / JHB",fleet:"500+",spend:"R2.5M/mo",tier:1},
+  {id:3,company:"DSV South Africa",sector:"logistics",location:"Nationwide",fleet:"500+",spend:"R2M+/mo",tier:1},
+  {id:4,company:"Unitrans",sector:"logistics",location:"Nationwide / JHB",fleet:"500+",spend:"R2M+/mo",tier:1},
+  {id:5,company:"G4S South Africa",sector:"security",location:"Nationwide",fleet:"500+",spend:"R2.25M/mo",tier:1},
+  {id:6,company:"Raubex Group",sector:"construction",location:"Nationwide",fleet:"400+",spend:"R1.8M/mo",tier:1},
+  {id:7,company:"Bidvest Protea Coin",sector:"security",location:"Nationwide",fleet:"400+",spend:"R1.8M/mo",tier:1},
+  {id:8,company:"Super Group Logistics",sector:"logistics",location:"Nationwide",fleet:"400+",spend:"R1.8M/mo",tier:1},
+  {id:9,company:"Barloworld Transport",sector:"logistics",location:"JHB / Cape Town",fleet:"300+",spend:"R1.5M+/mo",tier:1},
+  {id:10,company:"ADT South Africa",sector:"security",location:"Nationwide",fleet:"300+",spend:"R1.35M/mo",tier:1},
+  {id:11,company:"DHL Supply Chain SA",sector:"logistics",location:"Nationwide",fleet:"300+",spend:"R1.4M/mo",tier:1},
+  {id:12,company:"WBHO Construction",sector:"construction",location:"Nationwide",fleet:"300+",spend:"R1.35M/mo",tier:1},
+  {id:13,company:"Woolworths Food Logistics",sector:"retail",location:"Cape Town",fleet:"150+",spend:"R675k/mo",tier:1},
+  {id:14,company:"Stefanutti Stocks",sector:"construction",location:"Nationwide",fleet:"250+",spend:"R1.1M/mo",tier:1},
+  {id:15,company:"Securitas South Africa",sector:"security",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:16,company:"SBV Cash Services",sector:"security",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:17,company:"Murray & Roberts Civil",sector:"construction",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:18,company:"Aveng Infrastructure",sector:"construction",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:19,company:"Afrirent Holdings Fleet",sector:"construction",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:20,company:"Netcare Patient Transport",sector:"health",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:21,company:"Sibanye-Stillwater",sector:"mining",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:22,company:"Exxaro Resources",sector:"mining",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:23,company:"Massmart Supply Chain",sector:"retail",location:"JHB / CPT",fleet:"150+",spend:"R675k/mo",tier:1},
+  {id:24,company:"Checkers Distribution",sector:"retail",location:"Cape Town",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:25,company:"Onelogix Group",sector:"logistics",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:26,company:"Cargo Carriers",sector:"logistics",location:"Nationwide",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:27,company:"SPAR Western Cape DC",sector:"retail",location:"Cape Town",fleet:"120+",spend:"R540k/mo",tier:1},
+  {id:28,company:"Fastway Couriers SA",sector:"courier",location:"JHB / CPT / DBN",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:29,company:"The Courier Guy",sector:"courier",location:"Nationwide",fleet:"150+",spend:"R600k/mo",tier:1},
+  {id:30,company:"Aramex South Africa",sector:"courier",location:"Nationwide",fleet:"100+",spend:"R450k/mo",tier:1},
+  {id:31,company:"EnviroServ Waste Mgmt",sector:"waste",location:"Nationwide",fleet:"175+",spend:"R790k/mo",tier:1},
+  {id:32,company:"Averda South Africa",sector:"waste",location:"Nationwide",fleet:"100+",spend:"R450k/mo",tier:1},
+  {id:33,company:"Impala Platinum Logistics",sector:"mining",location:"Nationwide",fleet:"300+",spend:"R1.35M/mo",tier:1},
+  {id:34,company:"Gold Fields SA",sector:"mining",location:"Nationwide",fleet:"150+",spend:"R675k/mo",tier:1},
+  {id:35,company:"De Beers Consolidated",sector:"mining",location:"Nationwide",fleet:"150+",spend:"R675k/mo",tier:1},
+  {id:36,company:"Capespan Group",sector:"agriculture",location:"Cape Town",fleet:"80+",spend:"R360k/mo",tier:1},
+  {id:37,company:"Freshmark (Shoprite sub)",sector:"agriculture",location:"Cape Town",fleet:"100+",spend:"R450k/mo",tier:1},
+  {id:38,company:"Western Cape Government Health",sector:"health",location:"Western Cape",fleet:"150+",spend:"R675k/mo",tier:1},
+  {id:39,company:"City Logistics",sector:"logistics",location:"JHB / CPT / DBN",fleet:"150+",spend:"R650k/mo",tier:1},
+  {id:40,company:"Kargo National",sector:"logistics",location:"Nationwide",fleet:"120+",spend:"R540k/mo",tier:1},
+  {id:41,company:"Makro Distribution",sector:"retail",location:"JHB / CPT",fleet:"100+",spend:"R450k/mo",tier:1},
+  {id:42,company:"Pickup n Pay Distribution",sector:"retail",location:"Cape Town / JHB",fleet:"200+",spend:"R900k/mo",tier:1},
+  {id:43,company:"SAPS Vehicle Fleet",sector:"security",location:"Nationwide",fleet:"1000+",spend:"R4M+/mo",tier:1},
+  // Tier 2
+  {id:44,company:"RAM Couriers",sector:"courier",location:"Nationwide",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:45,company:"Dawn Wing",sector:"courier",location:"Nationwide",fleet:"60+",spend:"R270k/mo",tier:2},
+  {id:46,company:"MDS Collivery",sector:"courier",location:"Nationwide",fleet:"50+",spend:"R225k/mo",tier:2},
+  {id:47,company:"PostNet SA Franchises",sector:"courier",location:"Nationwide",fleet:"100+",spend:"R400k/mo",tier:2},
+  {id:48,company:"Interwaste Holdings",sector:"waste",location:"Nationwide",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:49,company:"Oricol Environmental",sector:"waste",location:"CPT / JHB / DBN",fleet:"50+",spend:"R225k/mo",tier:2},
+  {id:50,company:"The Waste Group",sector:"waste",location:"Nationwide",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:51,company:"Waste Carriers CPT",sector:"waste",location:"Cape Town",fleet:"40+",spend:"R180k/mo",tier:2},
+  {id:52,company:"Concor Civil",sector:"construction",location:"Nationwide",fleet:"150+",spend:"R675k/mo",tier:2},
+  {id:53,company:"Basil Read Holdings",sector:"construction",location:"Nationwide",fleet:"100+",spend:"R450k/mo",tier:2},
+  {id:54,company:"Ocon Brick & Construction",sector:"construction",location:"Western Cape",fleet:"50+",spend:"R225k/mo",tier:2},
+  {id:55,company:"WK Construction",sector:"construction",location:"Cape Town",fleet:"60+",spend:"R270k/mo",tier:2},
+  {id:56,company:"STOCKS Infrastructure",sector:"construction",location:"Western Cape",fleet:"40+",spend:"R180k/mo",tier:2},
+  {id:57,company:"Harmony Gold",sector:"mining",location:"Nationwide",fleet:"120+",spend:"R540k/mo",tier:2},
+  {id:58,company:"Petra Diamonds",sector:"mining",location:"Nationwide",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:59,company:"African Rainbow Minerals",sector:"mining",location:"Nationwide",fleet:"100+",spend:"R450k/mo",tier:2},
+  {id:60,company:"Palabora Mining Company",sector:"mining",location:"Limpopo",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:61,company:"Hortgro Fresh Logistics",sector:"agriculture",location:"Paarl, Western Cape",fleet:"40+",spend:"R180k/mo",tier:2},
+  {id:62,company:"Stellenbosch Farmers Winery",sector:"agriculture",location:"Stellenbosch",fleet:"30+",spend:"R135k/mo",tier:2},
+  {id:63,company:"Distell Group Logistics",sector:"agriculture",location:"Stellenbosch",fleet:"60+",spend:"R270k/mo",tier:2},
+  {id:64,company:"McCain Foods SA",sector:"agriculture",location:"Cape Town",fleet:"50+",spend:"R225k/mo",tier:2},
+  {id:65,company:"Tongaat Hulett",sector:"agriculture",location:"KZN / Nationwide",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:66,company:"Spar Fresh Produce W Cape",sector:"agriculture",location:"Paarl / Stellenbosch",fleet:"50+",spend:"R225k/mo",tier:2},
+  {id:67,company:"TFG Logistics (Foschini)",sector:"retail",location:"Cape Town",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:68,company:"Pnp Clothing Distribution",sector:"retail",location:"Cape Town",fleet:"40+",spend:"R180k/mo",tier:2},
+  {id:69,company:"Clicks Distribution",sector:"retail",location:"Cape Town",fleet:"60+",spend:"R270k/mo",tier:2},
+  {id:70,company:"Chubb Security SA",sector:"security",location:"Nationwide",fleet:"150+",spend:"R675k/mo",tier:2},
+  {id:71,company:"Gray Security",sector:"security",location:"Western Cape",fleet:"50+",spend:"R225k/mo",tier:2},
+  {id:72,company:"Mediclinic Fleet SA",sector:"health",location:"Nationwide",fleet:"100+",spend:"R450k/mo",tier:2},
+  {id:73,company:"Life Healthcare Transport",sector:"health",location:"Nationwide",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:74,company:"SA Ambulance Services",sector:"health",location:"Nationwide",fleet:"100+",spend:"R450k/mo",tier:2},
+  {id:75,company:"Clicks Pharmacy Distribution",sector:"health",location:"Cape Town",fleet:"50+",spend:"R225k/mo",tier:2},
+  {id:76,company:"Dischem Distribution",sector:"health",location:"JHB / CPT",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:77,company:"Vivo Energy SA",sector:"fuel",location:"Nationwide",fleet:"100+",spend:"R450k/mo",tier:2},
+  {id:78,company:"TotalEnergies SA",sector:"fuel",location:"Nationwide",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:79,company:"Astron Energy",sector:"fuel",location:"Cape Town",fleet:"60+",spend:"R270k/mo",tier:2},
+  {id:80,company:"Engen Petroleum",sector:"fuel",location:"Cape Town",fleet:"80+",spend:"R360k/mo",tier:2},
+  {id:81,company:"BP Southern Africa",sector:"fuel",location:"Nationwide",fleet:"100+",spend:"R450k/mo",tier:2},
+  {id:82,company:"MacDonald's Transport",sector:"logistics",location:"Western Cape",fleet:"100+",spend:"R450k/mo",tier:2},
+  {id:83,company:"V and H Transport",sector:"logistics",location:"Cape Town",fleet:"40+",spend:"R180k/mo",tier:2},
+  {id:84,company:"Masonite Freight",sector:"logistics",location:"Cape Town",fleet:"30+",spend:"R135k/mo",tier:2},
+  {id:85,company:"Pioneer Freight",sector:"logistics",location:"Cape Town",fleet:"25+",spend:"R112k/mo",tier:2},
+  {id:86,company:"LiebenLogistics",sector:"logistics",location:"Western Cape",fleet:"70+",spend:"R315k/mo",tier:2},
+  {id:87,company:"Titanic Trucking",sector:"logistics",location:"Cape Town",fleet:"80+",spend:"R360k/mo",tier:2},
+  // Tier 3
+  {id:88,company:"UrgentGo Courier",sector:"courier",location:"Western Cape",fleet:"20+",spend:"R90k/mo",tier:3},
+  {id:89,company:"GPM Waste",sector:"waste",location:"Western Cape",fleet:"30+",spend:"R135k/mo",tier:3},
+  {id:90,company:"Bhadreka Waste Solutions",sector:"waste",location:"Cape Town",fleet:"20+",spend:"R90k/mo",tier:3},
+  {id:91,company:"Northern Cape Diamond",sector:"mining",location:"Northern Cape",fleet:"40+",spend:"R180k/mo",tier:3},
+  {id:92,company:"Durr Estates Transport",sector:"agriculture",location:"Franschhoek",fleet:"20+",spend:"R90k/mo",tier:3},
+  {id:93,company:"Boland Agri",sector:"agriculture",location:"Western Cape",fleet:"30+",spend:"R135k/mo",tier:3},
+  {id:94,company:"Specialised Armed Response",sector:"security",location:"Cape Town",fleet:"30+",spend:"R135k/mo",tier:3},
+  {id:95,company:"NHN Pharmacy Network",sector:"health",location:"Western Cape",fleet:"20+",spend:"R90k/mo",tier:3},
+  {id:96,company:"Medicross Medical Fleet",sector:"health",location:"Cape Town",fleet:"15+",spend:"R67k/mo",tier:3},
+  {id:97,company:"SA Red Cross Ambulance",sector:"health",location:"Western Cape",fleet:"30+",spend:"R135k/mo",tier:3},
+  {id:98,company:"Mweza Transport",sector:"logistics",location:"Brackenfell, CPT",fleet:"60+",spend:"R270k/mo",tier:3},
+  {id:99,company:"IMVUSA Transport",sector:"logistics",location:"Kuils River, CPT",fleet:"50+",spend:"R225k/mo",tier:3},
+  {id:100,company:"Letaba Logistics",sector:"logistics",location:"Cape Town",fleet:"80+",spend:"R360k/mo",tier:3},
+];
+
+// ─── SECTOR PAIN POINTS ───────────────────────────────────────────────────────
+const PAIN = {
+  logistics: "Long-haul diesel costs and driver behaviour are eating into your margins on every run.",
+  construction: "Site-to-site fuel waste and plant idle time are two of the biggest controllable costs on any fleet.",
+  security: "Patrol fleets with high daily mileage and reactive routing are consistently the most underoptimised in the country.",
+  waste: "Fixed collection routes that haven't been re-optimised in years are a quiet drain on every waste fleet.",
+  retail: "Last-mile distribution costs keep rising and fleet running costs are squeezing already-tight margins.",
+  agriculture: "Seasonal transport cost spikes and inefficient farm-to-packhouse routing add up fast.",
+  mining: "Heavy vehicle fuel consumption between sites is one of the biggest controllable cost lines in mining operations.",
+  courier: "Driver behaviour on rapid-delivery routes — idling, speeding, sub-optimal sequencing — is where most courier fleets leak fuel.",
+  health: "Ambulance and patient transport fleets typically have significant idle time and inefficient dispatch patterns.",
+  fuel: "Fleet fuel management costs are a direct hit on margin for energy companies running their own distribution vehicles.",
+};
+
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY = "fueliq_outreach_v1";
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { sent: {}, log: [], todaySent: [], lastRunDate: null };
+}
+
+function saveState(state) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+let state = loadState();
+let queue = [];        // today's 25 prospects
+let generatedEmails = {}; // { id: { subject, body1, body2 } }
+let gmailToken = null;
+
+// ─── GMAIL OAuth ──────────────────────────────────────────────────────────────
+const GMAIL_SCOPES = "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email";
+// NOTE: Replace with your own Google OAuth Client ID for production
+// To set up: console.cloud.google.com → Create project → Enable Gmail API → Create OAuth credentials (Web App)
+const GMAIL_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+
+function connectGmail() {
+  // Show instructions since client ID needs setup
+  const clientId = GMAIL_CLIENT_ID;
+  if (clientId.includes("YOUR_GOOGLE")) {
+    showToast("⚙️ Setup required: see Gmail Setup instructions below.", "error");
+    showGmailSetupInstructions();
+    return;
+  }
+  const redirectUri = encodeURIComponent(window.location.href.split('?')[0]);
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${encodeURIComponent(GMAIL_SCOPES)}&prompt=select_account`;
+  window.location.href = url;
+}
+
+function showGmailSetupInstructions() {
+  const existing = document.getElementById('gmail-setup-banner');
+  if (existing) { existing.remove(); return; }
+  const banner = document.createElement('div');
+  banner.id = 'gmail-setup-banner';
+  banner.style = `background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1rem;font-size:13px;line-height:1.7;color:var(--text-mid)`;
+  banner.innerHTML = `
+    <div style="font-weight:500;color:var(--text);margin-bottom:.5rem">Gmail OAuth Setup (one-time)</div>
+    <ol style="padding-left:1.25rem;display:flex;flex-direction:column;gap:4px">
+      <li>Go to <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → New project</li>
+      <li>Enable the <strong>Gmail API</strong> under APIs &amp; Services</li>
+      <li>Create OAuth 2.0 credentials → Web Application type</li>
+      <li>Add this page's URL as an Authorised JavaScript origin</li>
+      <li>Copy your Client ID and replace <code style="background:var(--surface3);padding:1px 5px;border-radius:3px">YOUR_GOOGLE_CLIENT_ID</code> in this file's source</li>
+      <li>Reload and click Connect Gmail</li>
+    </ol>
+    <div style="margin-top:.75rem;color:var(--text-dim);font-size:12px">Alternatively: use <strong>Preview mode</strong> — generate all emails and open them in Gmail manually via mailto links.</div>
+  `;
+  document.querySelector('.content').prepend(banner);
+}
+
+function handleGmailRedirect() {
+  const hash = window.location.hash;
+  if (!hash.includes('access_token')) return;
+  const params = new URLSearchParams(hash.slice(1));
+  gmailToken = params.get('access_token');
+  window.location.hash = '';
+  if (gmailToken) {
+    fetchGmailUserInfo();
+  }
+}
+
+async function fetchGmailUserInfo() {
+  try {
+    const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+      headers: { Authorization: `Bearer ${gmailToken}` }
+    });
+    const info = await res.json();
+    document.getElementById('cfg-email').value = info.email || '';
+    setGmailConnected(info.email);
+  } catch(e) { console.error(e); }
+}
+
+function setGmailConnected(email) {
+  document.getElementById('gmail-dot').style.cssText = 'background:var(--accent);box-shadow:0 0 6px var(--accent-glow)';
+  document.getElementById('gmail-status-text').textContent = 'Gmail connected';
+  document.getElementById('gmail-connect-btn').style.display = 'none';
+  document.getElementById('gmail-connected-info').style.display = 'block';
+  document.getElementById('gmail-email-display').textContent = email;
+  document.getElementById('auth-banner').classList.add('hidden');
+  showToast(`✓ Gmail connected as ${email}`, 'success');
+}
+
+function disconnectGmail() {
+  gmailToken = null;
+  document.getElementById('gmail-dot').style.cssText = 'background:var(--text-dim);box-shadow:none';
+  document.getElementById('gmail-status-text').textContent = 'Gmail not connected';
+  document.getElementById('gmail-connect-btn').style.display = 'block';
+  document.getElementById('gmail-connected-info').style.display = 'none';
+}
+
+async function sendEmailViaGmail(to, subject, bodyHtml) {
+  if (!gmailToken) return false;
+  const from = document.getElementById('cfg-email').value || 'me';
+  const msg = [
+    `From: ${from}`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    `Content-Type: text/plain; charset=utf-8`,
+    ``,
+    bodyHtml
+  ].join('\r\n');
+  const encoded = btoa(unescape(encodeURIComponent(msg))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  try {
+    const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method:'POST',
+      headers:{ Authorization:`Bearer ${gmailToken}`, 'Content-Type':'application/json' },
+      body: JSON.stringify({ raw: encoded })
+    });
+    return res.ok;
+  } catch(e) { return false; }
+}
+
+// ─── AI EMAIL GENERATION ─────────────────────────────────────────────────────
+async function generateEmailForProspect(prospect, variation) {
+  const pain = PAIN[prospect.sector] || "Fleet fuel costs are one of the biggest controllable expenses in your operation.";
+  const dashUrl = document.getElementById('cfg-dashboard').value || '[DASHBOARD_LINK]';
+  const senderName = document.getElementById('cfg-name').value || 'Liya';
+  const calendly = "https://calendly.com/liyagoni84/30min";
+
+  const variationInstructions = {
+    A: "Open with a direct, factual statement about their fuel costs or fleet inefficiency. No question, no compliment. Like a colleague texting something useful.",
+    B: "Open with a mild curiosity-gap observation — something that makes them want to know more — then deliver the dashboard link.",
+    C: "Open with a social proof reference: 'Fleets like yours in [sector]…' or 'Most [sector] operators we've worked with…', then deliver the dashboard link."
+  };
+
+  const prompt = `You are writing cold outreach emails for FuelIQ, a SaaS fuel optimization tool for South African fleet businesses. 
+
+Write a TWO-PART email for this prospect:
+- Company: ${prospect.company}
+- Sector: ${prospect.sector}
+- Location: ${prospect.location}
+- Fleet size: ${prospect.fleet}
+- Estimated monthly fuel spend: ${prospect.spend}
+- Pain point: ${pain}
+
+VOICE VARIATION: ${variationInstructions[variation] || variationInstructions.A}
+
+RULES (follow precisely):
+1. Email 1 subject line: 5 words max, specific to their company or sector
+2. Email 1 body: 3-4 sentences. Open with direct value (NOT "I hope this finds you well"). Mention company name once. Reference sector pain. End with: "Here's a quick snapshot we put together for ${prospect.company}: ${dashUrl}"
+3. Email 2 body: MAXIMUM 2 sentences. First sentence: soft CTA ("If the numbers make sense, happy to walk you through it." or similar). Second line is ONLY the Calendly link: ${calendly}
+4. Sign off Email 1 with just: ${senderName}
+5. NO exclamation marks. NO filler phrases. NO "I hope". NO "I wanted to reach out".
+6. Tone: peer-to-peer, confident, brief
+
+Respond ONLY in this exact JSON format (no markdown, no explanation):
+{"subject":"...","body1":"...","body2":"..."}`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      model:"claude-sonnet-4-20250514",
+      max_tokens:1000,
+      messages:[{role:"user",content:prompt}]
+    })
+  });
+  const data = await res.json();
+  const text = data.content?.[0]?.text || '{}';
+  try {
+    const clean = text.replace(/```json|```/g,'').trim();
+    return JSON.parse(clean);
+  } catch(e) {
+    return {
+      subject:`Your fleet's fuel snapshot`,
+      body1:`${pain}\n\nHere's a quick snapshot we put together for ${prospect.company}: ${dashUrl}\n\n${senderName}`,
+      body2:`If the numbers make sense, happy to walk you through it.\n${calendly}`
+    };
+  }
+}
+
+// ─── QUEUE LOGIC ─────────────────────────────────────────────────────────────
+function getNextBatch(n) {
+  return PROSPECTS
+    .filter(p => !state.sent[p.id])
+    .sort((a,b) => a.tier - b.tier || a.id - b.id)
+    .slice(0, n);
+}
+
+async function generatePreview() {
+  const batchSize = parseInt(document.getElementById('cfg-batch').value);
+  queue = getNextBatch(batchSize);
+
+  if (queue.length === 0) {
+    showToast("All 100 leads have been contacted.", "success");
+    return;
+  }
+
+  showOverlay(`Generating ${queue.length} personalised emails with AI…`);
+  document.getElementById('preview-btn').disabled = true;
+
+  const voice = document.getElementById('cfg-voice').value;
+  const variations = ['A','B','C'];
+  generatedEmails = {};
+
+  for (let i = 0; i < queue.length; i++) {
+    const p = queue[i];
+    updateOverlayProgress(`${i+1} / ${queue.length} — ${p.company}`);
+    const v = voice === 'MIX' ? variations[i % 3] : voice;
+    generatedEmails[p.id] = await generateEmailForProspect(p, v);
+    await new Promise(r => setTimeout(r, 200)); // gentle rate limit
+  }
+
+  hideOverlay();
+  document.getElementById('preview-btn').disabled = false;
+  renderQueue();
+  document.getElementById('send-all-btn').style.display = 'inline-flex';
+  document.getElementById('send-count').textContent = queue.length;
+  showToast(`✓ ${queue.length} emails generated. Review and send.`, 'success');
+  addLog(`Generated ${queue.length} emails for today's batch`, 'info');
+}
+
+async function runDailyOutreach() {
+  await generatePreview();
+}
+
+async function sendAllQueued() {
+  const toSend = queue.filter(p => !state.sent[p.id]);
+  if (toSend.length === 0) { showToast("Nothing to send.", "error"); return; }
+
+  if (!gmailToken) {
+    showToast("Connect Gmail first to send emails automatically.", "error");
+    // Fallback: open mailto links
+    toSend.forEach(p => {
+      const email = generatedEmails[p.id];
+      if (!email) return;
+      const to = `fleet@${p.company.toLowerCase().replace(/[^a-z0-9]/g,'')}.co.za`;
+      const full = `${email.body1}\n\n---\n\n${email.body2}`;
+      window.open(`mailto:${to}?subject=${encodeURIComponent(email.subject)}&body=${encodeURIComponent(full)}`,'_blank');
+    });
+    showToast(`Opened ${toSend.length} mailto links — send from your email client.`, 'success');
+    markAllSent(toSend);
+    return;
+  }
+
+  showOverlay(`Sending ${toSend.length} emails via Gmail…`);
+
+  let sent = 0, failed = 0;
+  for (let i = 0; i < toSend.length; i++) {
+    const p = toSend[i];
+    updateOverlayProgress(`Sending ${i+1}/${toSend.length} — ${p.company}`);
+    const email = generatedEmails[p.id];
+    if (!email) continue;
+    const to = `fleet@${p.company.toLowerCase().replace(/[^a-z0-9]/g,'')}.co.za`; // placeholder
+    const combined = `${email.body1}\n\n---\n\n${email.body2}`;
+    const ok = await sendEmailViaGmail(to, email.subject, combined);
+    if (ok) {
+      markSent(p.id);
+      sent++;
+      addLog(`✓ Sent to ${p.company}`, 'ok');
+    } else {
+      failed++;
+      addLog(`✗ Failed: ${p.company}`, 'err');
+    }
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  hideOverlay();
+  updateStats();
+  renderQueue();
+  showToast(`✓ ${sent} emails sent${failed ? `, ${failed} failed` : ''}.`, 'success');
+}
+
+function markSent(id) {
+  state.sent[id] = { date: new Date().toISOString() };
+  state.todaySent = state.todaySent || [];
+  if (!state.todaySent.includes(id)) state.todaySent.push(id);
+  saveState(state);
+}
+
+function markAllSent(prospects) {
+  prospects.forEach(p => markSent(p.id));
+  updateStats();
+  renderQueue();
+  renderAllLeads();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderQueue() {
+  const tbody = document.getElementById('queue-body');
+  if (queue.length === 0) {
+    tbody.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--text-dim);font-size:13px">Click "Generate preview" to load today's 25 leads.</div>`;
+    return;
+  }
+  tbody.innerHTML = queue.map((p,i) => {
+    const sent = !!state.sent[p.id];
+    const email = generatedEmails[p.id];
+    return `<div class="lead-row${sent?' sent':''}" onclick="previewLead(${p.id})" style="cursor:pointer">
+      <div class="lead-num">${i+1}</div>
+      <div>
+        <div class="lead-name">${p.company}</div>
+        <div class="lead-company">${p.location} · ${p.fleet} vehicles</div>
+      </div>
+      <div><span class="lead-sector sc-${p.sector}">${p.sector}</span></div>
+      <div class="lead-spend">${p.spend}</div>
+      <div>${tierBadge(p.tier)}</div>
+      <div class="lead-status">
+        ${sent ? '<span class="badge badge-green">✓ Sent</span>'
+                : email ? '<span class="badge badge-blue">Ready</span>'
+                : '<span class="badge" style="background:var(--surface3);color:var(--text-dim);border:1px solid var(--border)">Pending</span>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  const sentCount = queue.filter(p => state.sent[p.id]).length;
+  document.getElementById('queue-count-badge').textContent = `${queue.length} leads`;
+  document.getElementById('queue-sent-label').textContent = sentCount > 0 ? `${sentCount} sent today` : '';
+}
+
+function previewLead(id) {
+  const email = generatedEmails[id];
+  const p = PROSPECTS.find(x => x.id === id);
+  if (!email || !p) return;
+
+  switchTab('preview', document.querySelectorAll('.tab')[1]);
+
+  const area = document.getElementById('preview-area');
+  const to = `fleet@${p.company.toLowerCase().replace(/[^a-z0-9]/g,'')}.co.za`;
+  area.innerHTML = `
+    <div style="margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:13px;font-weight:500">${p.company} <span class="badge badge-blue" style="margin-left:6px">${p.sector}</span></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" onclick="copyEmail(${id})" style="font-size:12px;padding:5px 10px">Copy email</button>
+        ${!state.sent[id] ? `<button class="btn btn-primary" onclick="sendSingleEmail(${id})" style="font-size:12px;padding:5px 10px">Send this email</button>` : '<span class="badge badge-green">✓ Already sent</span>'}
+      </div>
+    </div>
+    <div class="email-preview">
+      <div class="email-header">
+        <div class="email-field"><span class="email-field-label">To:</span><span class="email-field-val">${to}</span></div>
+        <div class="email-field"><span class="email-field-label">Subject:</span><span class="email-subject-val" id="prev-subject" contenteditable="true">${email.subject}</span></div>
+      </div>
+      <div class="email-body" id="prev-body1" contenteditable="true">${email.body1}</div>
+      <div class="email2-label">Follow-up (send immediately after)</div>
+      <div class="email2-body" id="prev-body2" contenteditable="true">${email.body2}</div>
+    </div>
+  `;
+}
+
+async function sendSingleEmail(id) {
+  const p = PROSPECTS.find(x => x.id === id);
+  const email = generatedEmails[id];
+  if (!p || !email) return;
+
+  // Read possibly-edited content
+  const subject = document.getElementById('prev-subject')?.innerText || email.subject;
+  const body1 = document.getElementById('prev-body1')?.innerText || email.body1;
+  const body2 = document.getElementById('prev-body2')?.innerText || email.body2;
+
+  if (!gmailToken) {
+    const to = `fleet@${p.company.toLowerCase().replace(/[^a-z0-9]/g,'')}.co.za`;
+    const combined = `${body1}\n\n---\n\n${body2}`;
+    window.open(`mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(combined)}`, '_blank');
+    markSent(id);
+    updateStats();
+    renderQueue();
+    renderAllLeads();
+    previewLead(id);
+    addLog(`↗ Opened mailto for ${p.company}`, 'ok');
+    return;
+  }
+
+  showOverlay(`Sending to ${p.company}…`);
+  const to = `fleet@${p.company.toLowerCase().replace(/[^a-z0-9]/g,'')}.co.za`;
+  const combined = `${body1}\n\n---\n\n${body2}`;
+  const ok = await sendEmailViaGmail(to, subject, combined);
+  hideOverlay();
+
+  if (ok) {
+    markSent(id);
+    updateStats();
+    renderQueue();
+    renderAllLeads();
+    previewLead(id);
+    showToast(`✓ Sent to ${p.company}`, 'success');
+    addLog(`✓ Sent to ${p.company}`, 'ok');
+  } else {
+    showToast(`Failed to send to ${p.company}`, 'error');
+  }
+}
+
+function copyEmail(id) {
+  const email = generatedEmails[id];
+  const p = PROSPECTS.find(x => x.id === id);
+  if (!email) return;
+  const text = `Subject: ${email.subject}\n\n${email.body1}\n\n---\n\n${email.body2}`;
+  navigator.clipboard.writeText(text).then(() => showToast(`Copied ${p.company} email to clipboard`, 'success'));
+}
+
+function renderAllLeads() {
+  const search = document.getElementById('all-search')?.value.toLowerCase() || '';
+  const filter = document.getElementById('all-filter')?.value || '';
+  const tbody = document.getElementById('all-leads-body');
+  const filtered = PROSPECTS.filter(p =>
+    (!search || p.company.toLowerCase().includes(search) || p.location.toLowerCase().includes(search)) &&
+    (!filter || p.sector === filter)
+  );
+  tbody.innerHTML = filtered.map((p,i) => {
+    const sent = !!state.sent[p.id];
+    return `<div class="lead-row${sent?' sent':''}">
+      <div class="lead-num">${p.id}</div>
+      <div>
+        <div class="lead-name">${p.company}</div>
+        <div class="lead-company">${p.location} · ${p.fleet}</div>
+      </div>
+      <div><span class="lead-sector sc-${p.sector}">${p.sector}</span></div>
+      <div class="lead-spend">${p.spend}</div>
+      <div>${tierBadge(p.tier)}</div>
+      <div class="lead-status">
+        ${sent
+          ? `<span class="badge badge-green">✓ ${new Date(state.sent[p.id].date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short'})}</span>`
+          : `<button class="btn btn-secondary" style="font-size:11px;padding:3px 8px" onclick="markSentManual(${p.id})">Mark sent</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markSentManual(id) {
+  markSent(id);
+  updateStats();
+  renderAllLeads();
+  showToast('Marked as contacted', 'success');
+}
+
+function updateStats() {
+  const sentCount = Object.keys(state.sent).length;
+  const remaining = PROSPECTS.length - sentCount;
+  const today = (state.todaySent || []).length;
+  document.getElementById('stat-sent').textContent = sentCount;
+  document.getElementById('stat-remaining').textContent = remaining;
+  document.getElementById('stat-today').textContent = today;
+  const pct = Math.round(sentCount / PROSPECTS.length * 100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+// ─── LOG ──────────────────────────────────────────────────────────────────────
+function addLog(msg, type='info') {
+  const time = new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  state.log = state.log || [];
+  state.log.unshift({ time, msg, type });
+  if (state.log.length > 200) state.log = state.log.slice(0,200);
+  saveState(state);
+  renderLog();
+}
+
+function renderLog() {
+  const body = document.getElementById('log-body');
+  if (!state.log || state.log.length === 0) {
+    body.innerHTML = `<div style="color:var(--text-dim)">No activity yet.</div>`;
+    document.getElementById('log-count').textContent = '0 entries';
+    return;
+  }
+  body.innerHTML = state.log.map(l =>
+    `<div class="log-line"><span class="log-time">[${l.time}]</span> <span class="log-${l.type}">${l.msg}</span></div>`
+  ).join('');
+  document.getElementById('log-count').textContent = state.log.length + ' entries';
+}
+
+function clearLog() {
+  state.log = [];
+  saveState(state);
+  renderLog();
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function tierBadge(t) {
+  const c = t===1?'badge-green':t===2?'badge-blue':'badge-amber';
+  return `<span class="badge ${c}">T${t}</span>`;
+}
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+function showOverlay(msg) {
+  document.getElementById('overlay-msg').textContent = msg;
+  document.getElementById('overlay-progress').textContent = '';
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function updateOverlayProgress(msg) {
+  document.getElementById('overlay-progress').textContent = msg;
+}
+
+function hideOverlay() {
+  document.getElementById('overlay').classList.add('hidden');
+}
+
+function showToast(msg, type='success') {
+  const wrap = document.getElementById('toast-wrap');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  wrap.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+function openResetModal() {
+  document.getElementById('reset-modal').classList.remove('hidden');
+}
+
+function closeResetModal() {
+  document.getElementById('reset-modal').classList.add('hidden');
+}
+
+function confirmReset() {
+  state = { sent: {}, log: [], todaySent: [], lastRunDate: null };
+  saveState(state);
+  generatedEmails = {};
+  queue = [];
+  closeResetModal();
+  updateStats();
+  renderQueue();
+  renderAllLeads();
+  renderLog();
+  document.getElementById('send-all-btn').style.display = 'none';
+  showToast('All progress reset.', 'success');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  // Date display
+  const now = new Date();
+  document.getElementById('today-date').textContent = now.toLocaleDateString('en-ZA',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('queue-date-label').textContent = now.toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long'});
+
+  // Check Gmail redirect
+  handleGmailRedirect();
+
+  // Restore state
+  updateStats();
+  renderAllLeads();
+  renderLog();
+
+  // Reset today's sent if it's a new day
+  const today = now.toDateString();
+  if (state.lastRunDate !== today) {
+    state.todaySent = [];
+    state.lastRunDate = today;
+    saveState(state);
+  }
+
+  // Show auth banner if not connected
+  if (!gmailToken) {
+    document.getElementById('auth-banner').classList.remove('hidden');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
